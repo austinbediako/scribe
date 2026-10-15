@@ -2426,22 +2426,17 @@ input {
   flex: 0 0 148px;
   width: 148px;
   padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--tl-text);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tl-muted);
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
   background: var(--tl-bg-raised);
   border-right: 1px solid var(--tl-line);
-}
-
-.meetingTimeline__laneDot {
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
 }
 
 .meetingTimeline__laneName {
@@ -2453,7 +2448,7 @@ input {
 .meetingTimeline__trackArea {
   flex: 1;
   position: relative;
-  height: 48px;
+  height: 72px;
   background: var(--tl-bg);
   cursor: pointer;
 }

@@ -194,6 +194,7 @@ export function MeetingTimeline({
     }
     return ordered;
   }, [normalizedEvents]);
+  const laneIndexByName = useMemo(() => new Map(lanes.map((lane, index) => [lane.name, index])), [lanes]);
 
   const playheadLeft = `${(safeCurrentTime / safeDuration) * 100}%`;
 
@@ -261,17 +262,17 @@ export function MeetingTimeline({
               </div>
             </div>
 
-            {lanes.map((lane) => (
-              <div key={lane.name} className="meetingTimeline__trackRow">
-                <div className="meetingTimeline__trackLabel" title={lane.name}>
-                  <span className="meetingTimeline__laneDot" style={{ background: lane.color }} />
-                  <span className="meetingTimeline__laneName">{lane.name}</span>
-                </div>
-                <div className="meetingTimeline__trackArea" onClick={handleSeekByClick}>
-                  {lane.events.map((event) => {
-                    const left = `${calculatePosition(event.timestamp, safeDuration)}%`;
-                    return (
-                      <span key={event.id} style={{ position: 'absolute', left, top: '50%', transform: 'translate(-50%, -50%)' }}>
+            <div className="meetingTimeline__trackRow">
+              <div className="meetingTimeline__trackLabel">
+                <span className="meetingTimeline__laneName">Speakers</span>
+              </div>
+              <div className="meetingTimeline__trackArea" onClick={handleSeekByClick}>
+                {normalizedEvents.map((event) => {
+                  const left = `${calculatePosition(event.timestamp, safeDuration)}%`;
+                  const laneIndex = laneIndexByName.get(event.lane) ?? 0;
+                  const top = `${((laneIndex + 0.5) / Math.max(1, lanes.length)) * 100}%`;
+                  return (
+                    <span key={event.id} style={{ position: 'absolute', left, top, transform: 'translate(-50%, -50%)' }}>
                         {event.endTimestamp ? (
                           <span
                             className="meetingTimeline__durationBar"
@@ -298,11 +299,10 @@ export function MeetingTimeline({
                         />
                       </span>
                     );
-                  })}
-                  <div className="meetingTimeline__playheadLine" style={{ left: playheadLeft }} />
-                </div>
+                })}
+                <div className="meetingTimeline__playheadLine" style={{ left: playheadLeft }} />
               </div>
-            ))}
+            </div>
           </div>
 
           {selectedEvent && (
