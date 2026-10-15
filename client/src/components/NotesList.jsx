@@ -1,4 +1,4 @@
-import { noteTitle, noteOwner, noteDate, summaryPreview } from '../utils.js';
+import { noteTitle, noteOwner, noteDate, summaryPreview, formatDateTime } from '../utils.js';
 import { ChevronRight } from './icons.jsx';
 
 function EmptyIllustration() {
@@ -23,13 +23,27 @@ function EmptyIllustration() {
   );
 }
 function initials(name) {
-  if (!name) return '?';
+  if (!name) return '';
   return name
     .split(/\s+/)
+    .filter(Boolean)
     .slice(0, 2)
     .map((part) => part[0])
     .join('')
     .toUpperCase();
+}
+
+const AVATAR_HUES = [262, 288, 200, 168, 340];
+
+function avatarStyle(note) {
+  const text = `${note?.public_id || ''}${note?.title || ''}`;
+  let hash = 0;
+  for (let i = 0; i < text.length; i += 1) hash = (hash * 31 + text.charCodeAt(i)) % 997;
+  const hue = AVATAR_HUES[hash % AVATAR_HUES.length];
+  return {
+    background: `hsl(${hue} 70% 94%)`,
+    color: `hsl(${hue} 55% 38%)`,
+  };
 }
 
 export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
@@ -49,13 +63,17 @@ export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
         <div className="list">
           {notes.map((note) => {
             const owner = noteOwner(note);
+            const title = noteTitle(note);
+            const letters = initials(owner) || initials(title) || 'M';
             return (
               <button key={note.id} className="note" onClick={() => onOpen(note.public_id || note.id)}>
-                <div className="note__avatar">{initials(owner)}</div>
+                <div className="note__avatar" style={avatarStyle(note)}>
+                  {letters}
+                </div>
                 <div className="note__body">
                   <div className="note__top">
-                    <span className="note__title">{noteTitle(note)}</span>
-                    <span className="note__date">{noteDate(note)}</span>
+                    <span className="note__title">{title}</span>
+                    <span className="note__date">{formatDateTime(noteDate(note))}</span>
                   </div>
                   <div className="note__meta">
                     {owner && <span className="note__owner">{owner}</span>}
