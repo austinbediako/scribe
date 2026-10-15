@@ -17,13 +17,13 @@ services:
         value: production
       - key: DEBUG
         value: "false"
-      # Free plan note: the service spins down after 15 idle minutes (~1 min
-      # cold start on next request) and the filesystem is ephemeral, so the
-      # SQLite file resets on every spin-down/redeploy. For durable data,
-      # attach a Render Postgres and set DATABASE_URL to its internal URL
-      # (free Postgres expires after 30 days).
+      # Durable data comes from the free Postgres defined below. NOTE: free
+      # Render Postgres expires 30 days after creation — upgrade or export
+      # before then if the data matters.
       - key: DATABASE_URL
-        value: sqlite:///./scribe.db
+        fromDatabase:
+          name: scribe-db
+          property: connectionString
       - key: USE_DEMO_DATA
         value: "false"
       - key: GRANOLA_API_BASE_URL
@@ -48,3 +48,9 @@ services:
       # Comma-separated allowed origins. Keep the Vercel frontend + local dev.
       - key: CORS_ORIGINS
         value: https://scribe-livid.vercel.app,https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+
+databases:
+  - name: scribe-db
+    plan: free
+    databaseName: scribe
+    user: scribe
