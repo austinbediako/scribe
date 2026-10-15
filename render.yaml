@@ -8,7 +8,7 @@ services:
     name: scribe-api
     runtime: python
     rootDir: server/backend
-    plan: starter
+    plan: free
     buildCommand: pip install .
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
@@ -17,8 +17,11 @@ services:
         value: production
       - key: DEBUG
         value: "false"
-      # Ephemeral by default. For durable data, attach a Render Postgres and set
-      # DATABASE_URL from its internal connection string, or add a persistent disk.
+      # Free plan note: the service spins down after 15 idle minutes (~1 min
+      # cold start on next request) and the filesystem is ephemeral, so the
+      # SQLite file resets on every spin-down/redeploy. For durable data,
+      # attach a Render Postgres and set DATABASE_URL to its internal URL
+      # (free Postgres expires after 30 days).
       - key: DATABASE_URL
         value: sqlite:///./scribe.db
       - key: USE_DEMO_DATA
