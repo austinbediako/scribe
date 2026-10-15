@@ -9,6 +9,7 @@ from app.api.deps import (
 from app.db.models import Meeting, MeetingCapture, TranscriptSegment
 from app.services.recall_capture_service import RecallClient, RecallNotConfiguredError
 from app.services.analysis_service import analyze_meeting
+from app.services.insight_service import generate_meeting_insight
 
 router = APIRouter()
 
@@ -138,6 +139,19 @@ def analyze_meeting_route(
             "talk_time_ms_by_speaker": talk_time,
         },
     }
+
+
+@router.get("/api/meetings/{meeting_id}/insight")
+def get_meeting_insight(
+    meeting_id: str,
+    db: Session = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    query, _ = _scoped_meeting_query(db, user, meeting_id)
+    meeting = query.first()
+    if not meeting:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    return generate_meeting_insight(db, meeting.id, user.id)
 
 
 @router.get("/api/meetings/{meeting_id}/transcript")

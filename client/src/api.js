@@ -89,6 +89,7 @@ export const api = {
   transcript: async (id) => request(`/meetings/${id}/transcript`),
   video: async (id) => request(`/meetings/${id}/video`),
   analyze: async (id) => request(`/meetings/${id}/analyze`, { method: 'POST' }),
+  meetingInsight: async (id) => request(`/meetings/${id}/insight`),
   folders: async () => ({ folders: [] }),
   getWeekly: async () => request('/insights/current'),
   generateWeekly: async () => request('/insights/current'),

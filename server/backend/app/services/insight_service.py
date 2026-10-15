@@ -54,6 +54,44 @@ def _serialize_insight(db: Session, insight: WeeklyInsight) -> dict:
     }
 
 
+def generate_meeting_insight(db: Session, meeting_id: int, user_id: int) -> dict:
+    observations = (
+        db.query(BehaviorObservation)
+        .join(Meeting)
+        .filter(BehaviorObservation.meeting_id == meeting_id, Meeting.user_id == user_id)
+        .order_by(BehaviorObservation.created_at.desc())
+        .all()
+    )
+    if not observations:
+        return {
+            "id": f"meeting-{meeting_id}-none",
+            "meeting_id": str(meeting_id),
+            "strength": "No analysis has been run for this meeting yet.",
+            "growth_area": "Open the meeting and run Analyze meeting first.",
+            "evidence_summary": "No behavior observations exist for this meeting.",
+            "micro_action": "Analyze the meeting transcript, then come back for a coaching card.",
+            "status": "insufficient_evidence",
+        }
+
+    counts = Counter(obs.behavior_label for obs in observations if obs.behavior_label != "insufficient_evidence")
+    primary_label = counts.most_common(1)[0][0] if counts else "insufficient_evidence"
+    status = "generated" if counts else "insufficient_evidence"
+    return {
+        "id": f"meeting-{meeting_id}",
+        "meeting_id": str(meeting_id),
+        "strength": LABEL_TO_STRENGTH.get(primary_label, "Your team sees patterns of thoughtful leadership."),
+        "growth_area": LABEL_TO_GROWTH.get(primary_label, "You could continue building stronger leadership habits with more evidence."),
+        "evidence_summary": "; ".join(obs.evidence_text for obs in observations[:3]),
+        "micro_action": (
+            "Before your next decision, ask one teammate for an alternative point of view."
+            if primary_label in {"gives_direct_instructions", "explores_alternatives"}
+            else "Before your next team conversation, invite one additional perspective and close with the decision you intend to make."
+        ),
+        "status": status,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def generate_weekly_insight_for_user(db: Session, user_email: str = "demo@example.com") -> dict:
     user = db.query(User).filter_by(email=user_email).first()
     if user is None:
