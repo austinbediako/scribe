@@ -32,7 +32,6 @@ export default function App() {
   const [token, setTokenState] = useState(() => localStorage.getItem('scribe_token'));
   const wsRef = useRef(null);
   const [user, setUser] = useState(null);
-  const [status, setStatus] = useState(null);
   const [notes, setNotes] = useState([]);
   const [captures, setCaptures] = useState([]);
   const [query, setQuery] = useState('');
@@ -69,13 +68,11 @@ export default function App() {
     setLoading(true);
     setError(null);
     try {
-      const [s, data, me, captureData] = await Promise.all([
-        api.status().catch(() => ({ hasApiKey: true, demo_mode: true })),
+      const [data, me, captureData] = await Promise.all([
         api.notes(),
         api.me().catch(() => null),
         api.captures(),
       ]);
-      setStatus(s);
       setNotes(notesFrom(data));
       setUser(me);
       setCaptures(Array.isArray(captureData) ? captureData : []);
@@ -85,22 +82,6 @@ export default function App() {
       setLoading(false);
     }
   }, []);
-
-  const syncNotes = async () => {
-    setLoading(true);
-    setError(null);
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'sync' }));
-      return;
-    }
-    try {
-      await api.sync();
-      await loadNotes();
-    } catch (e) {
-      setError(e);
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (!token || path !== '/app') return undefined;
@@ -162,7 +143,6 @@ export default function App() {
 
   useEffect(() => {
     if (!token) return;
-    api.status().then(setStatus).catch(() => setStatus({ hasApiKey: true, demo_mode: true }));
     api.me().then(setUser).catch(() => setUser(null));
   }, [token]);
 
@@ -228,7 +208,6 @@ export default function App() {
       <TopBar
         query={query}
         onQueryChange={setQuery}
-        status={status || (user ? { hasApiKey: true } : null)}
         user={user}
         onLogout={handleLogout}
         onHome={() => navigate('/')}
@@ -284,6 +263,7 @@ export default function App() {
               onLoadMore={() => {}}
               hasMore={false}
               loadingMore={false}
+              onScheduleCapture={() => navigate('/app/captures')}
             />
           )}
         </main>

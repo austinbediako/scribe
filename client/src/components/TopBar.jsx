@@ -1,6 +1,6 @@
 import { BrandMark, SearchIcon } from './icons.jsx';
 
-export function TopBar({ query, onQueryChange, status, user, onRefresh, onSync, onLogout, onHome }) {
+export function TopBar({ query, onQueryChange, user, onLogout, onHome }) {
   return (
     <header className="topbar">
       <button className="topbar__brand topbar__brand--btn" onClick={onHome} aria-label="Scribe home">
@@ -22,11 +22,6 @@ export function TopBar({ query, onQueryChange, status, user, onRefresh, onSync, 
       </div>
 
       <div className="topbar__right">
-        <span className={`status ${status?.hasApiKey ? 'status--on' : 'status--off'}`}>
-          <span className="status__dot" />
-          {status?.hasApiKey ? 'Connected' : 'Not connected'}
-        </span>
-
         {user?.email && <span className="topbar__user">{user.email}</span>}
         {onLogout && (
           <button className="btn btn--ghost" onClick={onLogout}>

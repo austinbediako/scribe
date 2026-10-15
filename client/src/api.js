@@ -57,7 +57,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  status: async () => request('/status'),
+
   signup: async ({ email, password }) =>
     request('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
   login: async ({ email, password }) =>
@@ -66,7 +66,7 @@ export const api = {
   logout: () => {
     clearToken();
   },
-  sync: async () => request('/integrations/granola/sync', { method: 'POST' }),
+
   captures: async () => request('/integrations/recall/captures'),
   createCapture: async (payload) =>
     request('/integrations/recall/captures', { method: 'POST', body: JSON.stringify(payload) }),

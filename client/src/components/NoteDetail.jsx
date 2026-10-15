@@ -189,7 +189,7 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
         <div className="detail__barMeta">
           {note?.source && (
             <span className="metaPill metaPill--source">
-              {note.source === 'recall' ? 'Recall capture' : 'Granola'}
+              {note.source === 'recall' ? 'Recall capture' : 'Imported'}
             </span>
           )}
           {note?.public_id && (

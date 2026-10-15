@@ -46,7 +46,7 @@ function avatarStyle(note) {
   };
 }
 
-export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
+export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore, onScheduleCapture }) {
   return (
     <div className="meeting-home">
       {notes.length === 0 ? (
@@ -56,8 +56,13 @@ export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
           </div>
           <h2 className="empty__title">No completed meetings yet</h2>
           <p className="empty__text">
-            Schedule a capture above, or sync notes from Granola. The capture bot will appear in the meeting participants.
+            Schedule a capture and Scribe's bot joins your meeting. The recording and transcript appear here when it finishes.
           </p>
+          {onScheduleCapture && (
+            <button className="btn btn--primary" onClick={onScheduleCapture}>
+              Schedule a capture
+            </button>
+          )}
         </div>
       ) : (
         <div className="list">

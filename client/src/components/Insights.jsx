@@ -11,7 +11,7 @@ function InsightCards({ insight, completing, onComplete }) {
         <h2 className="empty__title">Not enough evidence yet</h2>
         <p className="empty__text">
           {insight.growth_area ||
-            'Sync or analyze a few more meetings and Scribe will generate a coaching card.'}
+            'Capture or analyze a few more meetings and Scribe will generate a coaching card.'}
         </p>
       </div>
     );

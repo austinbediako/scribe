@@ -106,7 +106,7 @@ export function Landing({ onOpen, onSignUp }) {
               </button>
             </div>
             <p className="hero__footnote">
-              Works with Granola and Recall.ai — Google Meet, Zoom, Teams, Webex.
+              Powered by Recall.ai — works with Google Meet, Zoom, Teams, and Webex.
             </p>
           </div>
           <MeetingOrbit />
