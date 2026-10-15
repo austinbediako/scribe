@@ -1,33 +1,17 @@
-import { BrandMark, SparkleIcon, NoteIcon, FolderIcon, CheckIcon } from './icons.jsx';
+import { BrandMark, CheckIcon } from './icons.jsx';
 
-const features = [
-  {
-    icon: <SparkleIcon />,
-    title: 'Evidence-led coaching',
-    text:
-      'Scribe mines transcripts for the moments that matter — questions, instructions, and recognition — and ties every insight to real evidence.',
-  },
-  {
-    icon: <NoteIcon />,
-    title: 'One clear next step',
-    text:
-      'Each cycle delivers one strength, one growth area, and one micro-action you can try in your very next conversation.',
-  },
-  {
-    icon: <FolderIcon />,
-    title: 'Private by design',
-    text:
-      'Your meeting patterns stay yours. Encrypted in transit and owner-scoped at rest — never sent to your manager.',
-  },
+const points = [
+  'Every insight links to a real transcript moment',
+  'One micro-action per week, not a report',
+  'Your data stays yours — owner-scoped, never shared',
 ];
 
 function MeetingOrbit() {
   return (
     <div className="hero__visual" aria-hidden="true">
-      <div className="hero__halo" />
       <div className="hero__card hero__card--main">
         <div className="hero__cardTop">
-          <span className="hero__pill">Insight card</span>
+          <span className="hero__pill">This week</span>
           <span className="hero__dot" />
         </div>
         <div className="hero__cardTitle">Strength</div>
@@ -55,9 +39,9 @@ function MeetingOrbit() {
       <svg className="hero__wave" viewBox="0 0 420 260" preserveAspectRatio="none">
         <defs>
           <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(139,92,246,0.45)" />
-            <stop offset="50%" stopColor="rgba(168,85,247,0.95)" />
-            <stop offset="100%" stopColor="rgba(236,72,153,0.65)" />
+            <stop offset="0%" stopColor="rgba(109,40,217,0.35)" />
+            <stop offset="50%" stopColor="rgba(109,40,217,0.85)" />
+            <stop offset="100%" stopColor="rgba(91,33,182,0.55)" />
           </linearGradient>
         </defs>
         <path
@@ -72,7 +56,7 @@ function MeetingOrbit() {
           className="hero__wavePath hero__wavePath--soft"
           d="M0 180 C 50 130, 90 230, 140 170 S 200 90, 260 160 S 320 230, 380 160 S 410 150, 420 180"
           fill="none"
-          stroke="rgba(139,92,246,0.18)"
+          stroke="rgba(109,40,217,0.15)"
           strokeWidth="3"
           strokeLinecap="round"
         />
@@ -99,57 +83,45 @@ export function Landing({ onOpen, onSignUp }) {
         </div>
       </header>
 
-      <section className="hero hero--premium">
+      <main className="hero hero--premium">
         <div className="hero__grid">
           <div className="hero__copy">
             <p className="hero__eyebrow">Leadership coaching from meeting data</p>
             <h1 className="hero__title">
-              Lead with more
+              Your meetings already
               <br />
-              <span className="hero__titleAccent">intention.</span>
+              <span className="hero__titleAccent">know how you lead.</span>
             </h1>
             <p className="hero__text">
-              Scribe listens to the meetings you already have, surfaces the moments that
-              shape your leadership, and turns them into one small, repeatable action.
+              Scribe reads the transcripts of meetings you already run, finds the
+              moments that shaped the room, and turns them into one coaching action
+              each week.
             </p>
             <div className="hero__actions">
               <button className="btn btn--primary btn--lg" onClick={onSignUp}>
-                Start coaching
+                Get your first insight
               </button>
               <button className="btn btn--outline btn--lg" onClick={onOpen}>
                 Sign in
               </button>
             </div>
-            <ul className="hero__meta">
-              <li>
-                <CheckIcon /> No training from scratch
-              </li>
-              <li>
-                <CheckIcon /> Private by default
-              </li>
-              <li>
-                <CheckIcon /> Grounded in real evidence
-              </li>
-            </ul>
+            <p className="hero__footnote">
+              Works with Granola and Recall.ai — Google Meet, Zoom, Teams, Webex.
+            </p>
           </div>
           <MeetingOrbit />
         </div>
-      </section>
+      </main>
 
-      <section className="features features--premium" id="features">
-        {features.map((feature) => (
-          <article className="feature feature--premium" key={feature.title}>
-            <span className="feature__icon">{feature.icon}</span>
-            <h3 className="feature__title">{feature.title}</h3>
-            <p className="feature__text">{feature.text}</p>
-          </article>
-        ))}
-      </section>
-
-      <footer className="landing__footer">
-        <p>
-          Powered by Granola and Recall.ai. Works with Google Meet, Zoom, Teams, and Webex.
-        </p>
+      <footer className="landing__strip">
+        <ul className="landing__points">
+          {points.map((point) => (
+            <li key={point}>
+              <CheckIcon />
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
       </footer>
     </div>
   );
