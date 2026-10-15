@@ -1,0 +1,59 @@
+# Render blueprint for Scribe.
+# Dashboard: New > Blueprint > pick this repo. Secrets marked sync:false are set
+# once in the Render dashboard (never commit real values here).
+services:
+  - type: web
+    name: scribe-api
+    runtime: python
+    rootDir: server/backend
+    plan: starter
+    buildCommand: pip install .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+      # Ephemeral by default. For durable data, attach a Render Postgres and set
+      # DATABASE_URL from its internal connection string, or add a persistent disk.
+      - key: DATABASE_URL
+        value: sqlite:///./scribe.db
+      - key: USE_DEMO_DATA
+        value: "false"
+      - key: GRANOLA_API_BASE_URL
+        value: https://public-api.granola.ai/v1
+      - key: GRANOLA_AUTH_HEADER
+        value: Authorization
+      - key: GRANOLA_AUTH_SCHEME
+        value: Bearer
+      - key: GRANOLA_API_KEY
+        sync: false
+      - key: RECALL_REGION
+        value: us-east-1
+      - key: RECALL_API_BASE_URL
+        value: https://us-east-1.recall.ai/api/v1
+      - key: RECALL_API_KEY
+        sync: false
+      - key: RECALL_WORKSPACE_VERIFICATION_SECRET
+        sync: false
+      # Set to https://scribe-api.onrender.com once the service URL is known.
+      - key: PUBLIC_API_BASE_URL
+        sync: false
+      # Comma-separated origins, e.g. https://scribe-web.onrender.com,http://localhost:5173
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: static
+    name: scribe-web
+    rootDir: client
+    buildCommand: pnpm install --frozen-lockfile && pnpm run build
+    staticPublishPath: dist
+    routes:
+      # Proxy API + WebSocket traffic to the backend service.
+      - type: rewrite
+        source: /api/*
+        destination: https://scribe-api.onrender.com/api/*
+      - type: rewrite
+        source: /ws
+        destination: https://scribe-api.onrender.com/ws

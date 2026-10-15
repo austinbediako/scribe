@@ -1,0 +1,21 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+*.sqlite3
+
+# Node / frontend
+node_modules/
+client/dist/
+pnpm-debug.log*
+
+# OS / editor
+.DS_Store
