@@ -31,7 +31,7 @@ const CATEGORY_COLOR = {
   neutral: '#6B7280',
 };
 
-const TRACK_ORDER = ['bot', 'events', 'logs'];
+const DEFAULT_LANE = 'Speakers';
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -50,15 +50,14 @@ function normalizeEvent(event, durationSeconds) {
   if (!Number.isFinite(rawTimestamp) || rawTimestamp < 0) return null;
   const safeDuration = Math.max(1, Number(durationSeconds) || 1);
   const category = typeof event.category === 'string' && CATEGORY_COLOR[event.category] ? event.category : 'neutral';
-  const track = typeof event.track === 'string' ? event.track : 'events';
-  if (!TRACK_ORDER.includes(track)) return null;
+  const lane = typeof event.lane === 'string' && event.lane.trim() ? event.lane.trim() : DEFAULT_LANE;
   const timestamp = clamp(rawTimestamp, 0, safeDuration);
   const endTimestamp = Number.isFinite(Number(event.endTimestamp))
     ? clamp(Number(event.endTimestamp), timestamp, safeDuration)
     : undefined;
   return {
-    id: String(event.id || `${track}-${timestamp}-${event.title || 'event'}`),
-    track,
+    id: String(event.id || `${lane}-${timestamp}-${event.title || 'event'}`),
+    lane,
     category,
     color: typeof event.color === 'string' && event.color ? event.color : null,
     title: typeof event.title === 'string' && event.title.trim() ? event.title.trim() : 'Untitled event',
@@ -182,7 +181,19 @@ export function MeetingTimeline({
     onSeek?.(next * safeDuration);
   };
 
-  const trackEvents = (trackName) => normalizedEvents.filter((event) => event.track === trackName);
+  const lanes = useMemo(() => {
+    const ordered = [];
+    const byName = new Map();
+    for (const event of normalizedEvents) {
+      if (!byName.has(event.lane)) {
+        const entry = { name: event.lane, color: event.color || CATEGORY_COLOR[event.category], events: [] };
+        byName.set(event.lane, entry);
+        ordered.push(entry);
+      }
+      byName.get(event.lane).events.push(event);
+    }
+    return ordered;
+  }, [normalizedEvents]);
 
   const playheadLeft = `${(safeCurrentTime / safeDuration) * 100}%`;
 
@@ -250,11 +261,14 @@ export function MeetingTimeline({
               </div>
             </div>
 
-            {TRACK_ORDER.map((trackName) => (
-              <div key={trackName} className="meetingTimeline__trackRow">
-                <div className="meetingTimeline__trackLabel">{trackName.toUpperCase()}</div>
+            {lanes.map((lane) => (
+              <div key={lane.name} className="meetingTimeline__trackRow">
+                <div className="meetingTimeline__trackLabel" title={lane.name}>
+                  <span className="meetingTimeline__laneDot" style={{ background: lane.color }} />
+                  <span className="meetingTimeline__laneName">{lane.name}</span>
+                </div>
                 <div className="meetingTimeline__trackArea" onClick={handleSeekByClick}>
-                  {trackEvents(trackName).map((event) => {
+                  {lane.events.map((event) => {
                     const left = `${calculatePosition(event.timestamp, safeDuration)}%`;
                     return (
                       <span key={event.id} style={{ position: 'absolute', left, top: '50%', transform: 'translate(-50%, -50%)' }}>

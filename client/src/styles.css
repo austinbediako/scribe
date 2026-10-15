@@ -2371,8 +2371,8 @@ input {
 }
 
 .meetingTimeline__labelColumn {
-  flex: 0 0 88px;
-  width: 88px;
+  flex: 0 0 148px;
+  width: 148px;
   padding: 8px 12px;
   background: var(--tl-bg-raised);
   border-right: 1px solid var(--tl-line);
@@ -2423,18 +2423,31 @@ input {
 }
 
 .meetingTimeline__trackLabel {
-  flex: 0 0 88px;
-  width: 88px;
+  flex: 0 0 148px;
+  width: 148px;
   padding: 8px 12px;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--tl-muted);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tl-text);
   display: flex;
   align-items: center;
+  gap: 8px;
+  min-width: 0;
   background: var(--tl-bg-raised);
   border-right: 1px solid var(--tl-line);
+}
+
+.meetingTimeline__laneDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.meetingTimeline__laneName {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .meetingTimeline__trackArea {
@@ -2576,16 +2589,17 @@ input {
   }
 
   .meetingTimeline__labelColumn {
-    flex: 0 0 68px;
-    width: 68px;
+    flex: 0 0 96px;
+    width: 96px;
     padding: 6px 8px;
   }
 
   .meetingTimeline__trackLabel {
-    flex: 0 0 68px;
-    width: 68px;
+    flex: 0 0 96px;
+    width: 96px;
     padding: 6px 8px;
-    font-size: 9px;
+    font-size: 11px;
+    gap: 6px;
   }
 
   .meetingTimeline__trackArea {

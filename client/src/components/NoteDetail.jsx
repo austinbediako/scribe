@@ -128,7 +128,7 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
                   const participantName = entry?.participant?.name || 'Speaker';
                   return {
                     id: `speaker-${participantKey}-${entry?.start_timestamp?.relative || 0}`,
-                    track: 'events',
+                    lane: participantName,
                     category: 'system',
                     color: speakerColor(participantKey),
                     timestamp: Number(entry?.start_timestamp?.relative) || 0,
@@ -152,44 +152,6 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
         if (cancelled) return;
         setVideoUrl(null);
         setVideoStatus('unavailable');
-      });
-
-    api.note(noteId)
-      .then((noteData) => {
-        if (cancelled) return;
-        if (noteData && noteData.started_at) {
-          const startTime = new Date(noteData.started_at).getTime() / 1000;
-          const botEvents = [
-            {
-              id: 'bot-scheduled',
-              track: 'bot',
-              category: 'system',
-              timestamp: 0,
-              title: 'Bot scheduled',
-              description: 'Meeting capture was scheduled',
-            },
-            {
-              id: 'bot-joined',
-              track: 'bot',
-              category: 'success',
-              timestamp: Math.max(5, startTime),
-              title: 'Bot joined meeting',
-              description: 'Scribe Meeting Coach joined the call',
-            },
-            {
-              id: 'bot-recording',
-              track: 'bot',
-              category: 'success',
-              timestamp: Math.max(8, startTime + 2),
-              title: 'Recording started',
-              description: 'Bot began capturing audio/video',
-            },
-          ];
-          setTimelineEvents((prev) => [...prev, ...botEvents]);
-        }
-      })
-      .catch(() => {
-        // Ignore errors for bot events
       });
 
     return () => {
