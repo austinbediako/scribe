@@ -30,6 +30,7 @@ async def _serialize_meetings(db: Session, user_id: int | None) -> list[dict[str
         results.append(
             {
                 "id": str(meeting.id),
+                "public_id": meeting.public_id,
                 "granola_meeting_id": meeting.granola_meeting_id,
                 "title": meeting.title,
                 "source": "recall" if meeting.granola_meeting_id.startswith("recall:") else "granola",
