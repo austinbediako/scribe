@@ -554,43 +554,61 @@ input {
   padding-bottom: 32px;
 }
 
-.capture {
-  margin: 24px;
-  padding: 22px;
+.captures {
+  padding: 40px 48px;
+  max-width: 880px;
+}
+
+.captures__header {
+  margin-bottom: 28px;
+}
+
+.captureCard {
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--panel);
+  border-radius: 16px;
+  background: var(--bg);
+  padding: 24px;
+  margin-bottom: 28px;
 }
 
-.capture__eyebrow {
-  margin: 0 0 5px;
-  color: var(--purple);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.capture__title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 650;
-}
-
-.capture__description {
-  max-width: 700px;
-  margin: 6px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.capture__form {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.9fr) minmax(260px, 1.4fr) minmax(180px, 0.9fr);
+.captureCard__head {
+  display: flex;
   gap: 14px;
-  align-items: end;
-  margin-top: 18px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.captureCard__icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.captureCard__title {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.captureCard__description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+  max-width: 520px;
+}
+
+.captureForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px;
 }
 
 .capture__field {
@@ -621,91 +639,172 @@ input {
   line-height: 1.35;
 }
 
-.capture__consent {
-  grid-column: 1 / -2;
+.captureForm__consent {
+  grid-column: 1 / -1;
   display: flex;
   align-items: flex-start;
-  gap: 9px;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--panel);
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
 }
 
-.capture__consent input {
+.captureForm__consent input {
   flex: 0 0 auto;
   margin: 2px 0 0;
   accent-color: var(--purple);
 }
 
-.capture__error {
+.captureForm .auth__error {
   grid-column: 1 / -1;
   margin: 0;
-  color: var(--danger-ink);
-  font-size: 13px;
 }
 
-.capture__queue {
-  margin-top: 20px;
-  border-top: 1px solid var(--line);
+.captureForm__actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.capture__queue h3 {
-  margin: 14px 0 4px;
-  color: var(--ink-2);
-  font-size: 13px;
+/* ---------- Capture queue ---------- */
+
+.captureQueue .section__title {
+  margin-bottom: 10px;
 }
 
-.capture__item {
+.captureQueue__empty {
+  margin: 0;
+  padding: 24px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13.5px;
+  text-align: center;
+}
+
+.captureQueue__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.captureItem {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-height: 50px;
-  padding: 8px 0;
+  gap: 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line-soft);
 }
 
-.capture__itemText {
-  display: flex;
+.captureItem:last-child {
+  border-bottom: none;
+}
+
+.captureItem__dot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted-2);
+}
+
+.captureItem__dot--active {
+  background: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+}
+
+.captureItem__dot--pending {
+  background: var(--purple);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.14);
+}
+
+.captureItem__dot--attention {
+  background: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.16);
+}
+
+.captureItem__dot--error {
+  background: var(--danger-ink);
+  box-shadow: 0 0 0 3px rgba(185, 28, 28, 0.14);
+}
+
+.captureItem__dot--done {
+  background: #15803d;
+}
+
+.captureItem__text {
   flex: 1;
+  display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
-  font-size: 13px;
 }
 
-.capture__itemText strong {
+.captureItem__text strong {
+  font-size: 14px;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.capture__itemText span {
+.captureItem__meta {
   color: var(--muted);
   font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.capture__itemText .capture__detail {
-  color: var(--ink-2);
-}
-
-.capture__status {
+.captureItem__status {
   flex: 0 0 auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--hover);
   color: var(--muted);
-  font-size: 12px;
 }
 
-.capture__status--completed,
-.capture__status--recording {
+.captureItem__status--active {
+  background: #dcfce7;
   color: #15803d;
 }
 
-.capture__status--failed,
-.capture__status--recording_denied {
+.captureItem__status--pending {
+  background: var(--purple-soft);
+  color: var(--purple);
+}
+
+.captureItem__status--attention {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.captureItem__status--error {
+  background: var(--danger-bg);
   color: var(--danger-ink);
 }
 
-.capture__status--waiting_room {
-  color: #a16207;
+.captureItem__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.captureItem__cancel {
+  color: var(--danger-ink);
 }
 
 .list {
@@ -825,27 +924,35 @@ input {
 }
 
 @media (max-width: 760px) {
-  .capture {
-    margin: 14px;
-    padding: 16px;
+  .captures {
+    padding: 26px 18px 96px;
   }
 
-  .capture__form {
-    grid-template-columns: minmax(0, 1fr);
+  .captureCard {
+    padding: 18px;
   }
 
-  .capture__consent {
-    grid-column: 1;
+  .captureForm {
+    grid-template-columns: 1fr;
   }
 
-  .capture__item {
+  .captureItem {
     align-items: flex-start;
     flex-wrap: wrap;
-    gap: 7px 12px;
+    gap: 6px 12px;
   }
 
-  .capture__itemText {
-    flex-basis: calc(100% - 110px);
+  .captureItem__dot {
+    margin-top: 6px;
+  }
+
+  .captureItem__text {
+    flex-basis: calc(100% - 120px);
+  }
+
+  .captureItem__actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
 
