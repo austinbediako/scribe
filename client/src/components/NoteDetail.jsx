@@ -199,20 +199,34 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
     ? (new Date(note.ended_at).getTime() - new Date(note.started_at).getTime()) / 1000
     : 120);
 
+  const copyPublicId = () => {
+    if (note?.public_id) navigator.clipboard?.writeText(note.public_id).catch(() => {});
+  };
+
   return (
     <div className="detail">
-      <div className="detail__bar detail__bar--rich">
-        <nav className="breadcrumb" aria-label="Breadcrumb">
-          <button type="button" className="breadcrumb__link" onClick={onHome || (() => {})}>Home</button>
-          <span className="breadcrumb__sep">/</span>
-          <button type="button" className="breadcrumb__link" onClick={onMeetings || onBack}>Meetings</button>
-          <span className="breadcrumb__sep">/</span>
-          <span className="breadcrumb__current">{noteTitle(state.note || { title: noteId })}</span>
-        </nav>
+      <div className="detail__bar">
         <button className="btn btn--ghost detail__back" onClick={onBack}>
           <ChevronLeft />
-          Back
+          Meetings
         </button>
+        <div className="detail__barMeta">
+          {note?.source && (
+            <span className="metaPill metaPill--source">
+              {note.source === 'recall' ? 'Recall capture' : 'Granola'}
+            </span>
+          )}
+          {note?.public_id && (
+            <button
+              type="button"
+              className="metaPill metaPill--id"
+              onClick={copyPublicId}
+              title="Copy meeting ID"
+            >
+              {note.public_id}
+            </button>
+          )}
+        </div>
       </div>
 
       {state.loading && <div className="detail__loading">Loading meeting…</div>}
@@ -226,120 +240,136 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
 
       {note && (
         <article className="detail__content">
-          <header className="detail__hero">
-            <div className="detail__kicker">Meeting details</div>
+          <header className="detail__header">
             <h1 className="detail__title">{noteTitle(note)}</h1>
             <div className="detail__meta">
-              {noteOwner(note) && <span className="metaPill">{noteOwner(note)}</span>}
+              {noteOwner(note) && <span className="detail__metaItem">{noteOwner(note)}</span>}
               {formatDateTime(note.started_at || note.created_at) && (
-                <span className="metaPill">{formatDateTime(note.started_at || note.created_at)}</span>
+                <span className="detail__metaItem">
+                  {formatDateTime(note.started_at || note.created_at)}
+                </span>
               )}
-              {note?.source && <span className="metaPill">{note.source === 'recall' ? 'Recall capture' : 'Granola'}</span>}
+              {durationSec > 0 && (
+                <span className="detail__metaItem">{formatPlaybackDuration(durationSec)}</span>
+              )}
             </div>
           </header>
 
           {(videoStatus === 'loading' || videoStatus === 'ready') && (
             <section className="section">
-              <h2 className="section__title">Meeting recording</h2>
+              <div className="section__header">
+                <h2 className="section__title">Recording</h2>
+                {videoStatus === 'ready' && (
+                  <a
+                    className="recordingLink"
+                    href={videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Open or download recording"
+                  >
+                    Open in new tab
+                    <ChevronRight className="recordingLink__chevron" />
+                  </a>
+                )}
+              </div>
               {videoStatus === 'loading' ? (
-                <div
-                  className="empty__text"
-                  style={{
-                    width: '100%',
-                    maxWidth: '760px',
-                    minHeight: '180px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: '12px',
-                    border: '1px dashed var(--border, #d1d5db)',
-                    background: 'var(--surface-2, #f4f4f5)',
-                  }}
-                >
+                <div className="detailVideo detailVideo--loading">
                   Loading meeting recording…
                 </div>
               ) : (
                 <video
                   ref={videoRef}
+                  className="detailVideo"
                   src={videoUrl}
                   controls
                   preload="none"
                   playsInline
-                  style={{ width: '100%', maxWidth: '760px', borderRadius: '12px' }}
                 />
               )}
-              <a className="recordingAction" href={videoUrl} target="_blank" rel="noreferrer" aria-label="Open or download recording">
-                <svg className="recordingAction__art" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="recordingGradient" x1="6" y1="10" x2="58" y2="54" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#8b5cf6" />
-                      <stop offset="1" stopColor="#5b21b6" />
-                    </linearGradient>
-                  </defs>
-                  <rect x="6" y="10" width="52" height="44" rx="11" fill="url(#recordingGradient)" />
-                  <path d="M26 24.5v15l14-7.5-14-7.5Z" fill="white" />
-                  <path d="M49 41l6 6-6 6" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="17" cy="17" r="3.5" fill="white" fillOpacity="0.75" />
-                </svg>
-                <span className="recordingAction__text">
-                  <strong>Open or download recording</strong>
-                  <small>Opens the secure Recall-hosted video in a new tab.</small>
-                </span>
-                <ChevronRight className="recordingAction__chevron" />
-              </a>
             </section>
           )}
 
-          <MeetingTimeline
-            durationSeconds={durationSec}
-            currentTime={currentTimeSec}
-            isPlaying={isPlaying}
-            events={timelineEvents}
-            meetingTimestamp={meetingTimestamp}
-            isLoading={state.loading || videoStatus === 'loading'}
-            error={state.error?.message || null}
-            onPlay={handlePlay}
-            onPause={handlePause}
-            onSeek={(sec) => seekTo(sec * 1000)}
-            onEventSelect={(event) => console.log('Event selected:', event)}
-          />
+          <section className="section">
+            <h2 className="section__title">Timeline</h2>
+            <MeetingTimeline
+              durationSeconds={durationSec}
+              currentTime={currentTimeSec}
+              isPlaying={isPlaying}
+              events={timelineEvents}
+              meetingTimestamp={meetingTimestamp}
+              isLoading={state.loading || videoStatus === 'loading'}
+              error={state.error?.message || null}
+              onPlay={handlePlay}
+              onPause={handlePause}
+              onSeek={(sec) => seekTo(sec * 1000)}
+              onEventSelect={(event) => console.log('Event selected:', event)}
+            />
+          </section>
 
           <section className="section">
             <h2 className="section__title">Transcript</h2>
             <TranscriptBlock transcript={state.transcript} onSeek={seekTo} />
           </section>
 
-          <section className="section section--analyze">
-            <button className="btn btn--primary analyzeDock__button" onClick={analyze} disabled={analysis.loading}>
-              {analysis.loading ? 'Analyzing…' : 'Analyze meeting'}
-            </button>
-            {analysis.error && <p className="auth__error">{analysis.error.message}</p>}
-            {analysis.result && (
-              <div className="analysisResult">
-                <p className="analysisCount">{analysis.result.observation_count} observations</p>
-                <div className="talkTime">
-                  <span className="talkTime__label">Talk time</span>
-                  {Object.entries(analysis.result.metrics?.talk_time_ms_by_speaker || {}).map(([speaker, ms]) => (
-                    <span className="talkTime__item" key={speaker}>
-                      {speaker}: {money(ms)}
-                    </span>
-                  ))}
+          <section className="section">
+            <div className="analysisPanel">
+              <div className="analysisPanel__header">
+                <div>
+                  <h2 className="section__title">Behavior analysis</h2>
+                  <p className="analysisPanel__hint">
+                    Scans the transcript for observable leadership behaviors and links each one to evidence.
+                  </p>
                 </div>
-                <ul className="observationList">
-                  {analysis.result.observations.map((observation) => (
-                    <li key={observation.id} className="observation">
-                      <strong>{observation.behavior_label}</strong> ({observation.confidence})
-                      <p>{observation.evidence_text}</p>
-                    </li>
-                  ))}
-                </ul>
+                <button className="btn btn--primary" onClick={analyze} disabled={analysis.loading}>
+                  {analysis.loading ? 'Analyzing…' : analysis.result ? 'Re-analyze' : 'Analyze meeting'}
+                </button>
               </div>
-            )}
+              {analysis.error && <p className="auth__error">{analysis.error.message}</p>}
+              {analysis.result && (
+                <div className="analysisResult">
+                  <div className="analysisResult__meta">
+                    <span className="analysisCount">
+                      {analysis.result.observation_count} observations
+                    </span>
+                    <div className="talkTime">
+                      {Object.entries(analysis.result.metrics?.talk_time_ms_by_speaker || {}).map(([speaker, ms]) => (
+                        <span className="talkTime__item" key={speaker}>
+                          {speaker} · {money(ms)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <ul className="observationList">
+                    {analysis.result.observations.map((observation) => (
+                      <li key={observation.id} className="observation">
+                        <div className="observation__head">
+                          <strong>{observation.behavior_label.replace(/_/g, ' ')}</strong>
+                          <span className={`observation__confidence observation__confidence--${observation.confidence}`}>
+                            {observation.confidence}
+                          </span>
+                        </div>
+                        <p>{observation.evidence_text}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </section>
         </article>
       )}
     </div>
   );
+}
+
+function formatPlaybackDuration(seconds) {
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  if (m >= 60) {
+    return `${Math.floor(m / 60)}h ${m % 60}m`;
+  }
+  return s ? `${m}m ${s}s` : `${m}m`;
 }
 
 function formatMilliseconds(value) {
@@ -367,16 +397,21 @@ function TranscriptBlock({ transcript, onSeek }) {
         return (
         <div className="turn" key={index}>
           <div className="turn__side">
-            <span className="turn__speaker">{segment.speaker}</span>
-            {(segment.timestampMs || segment.timestamp) !== null && (
-              <button
-                type="button"
-                className="turn__time turn__time--link"
-                onClick={() => onSeek?.(segment.timestampMs ?? segment.timestamp)}
-              >
-                {timeLabel}
-              </button>
-            )}
+            <span className="turn__avatar" aria-hidden="true">
+              {(segment.speaker || '?').trim().charAt(0).toUpperCase()}
+            </span>
+            <div className="turn__who">
+              <span className="turn__speaker">{segment.speaker || 'Unknown'}</span>
+              {(segment.timestampMs || segment.timestamp) !== null && (
+                <button
+                  type="button"
+                  className="turn__time turn__time--link"
+                  onClick={() => onSeek?.(segment.timestampMs ?? segment.timestamp)}
+                >
+                  {timeLabel}
+                </button>
+              )}
+            </div>
           </div>
           <div className="turn__text">{segment.text}</div>
         </div>

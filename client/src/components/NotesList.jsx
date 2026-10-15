@@ -50,7 +50,7 @@ export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
           {notes.map((note) => {
             const owner = noteOwner(note);
             return (
-              <button key={note.id} className="note" onClick={() => onOpen(note.id)}>
+              <button key={note.id} className="note" onClick={() => onOpen(note.public_id || note.id)}>
                 <div className="note__avatar">{initials(owner)}</div>
                 <div className="note__body">
                   <div className="note__top">

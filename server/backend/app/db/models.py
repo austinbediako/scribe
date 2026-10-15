@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import secrets
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -90,10 +91,17 @@ class CalendarConnection(Base):
     captures: Mapped[list[MeetingCapture]] = relationship(back_populates="calendar_connection")
 
 
+def generate_public_id() -> str:
+    return f"mtg-{secrets.token_urlsafe(6)}"
+
+
 class Meeting(Base):
     __tablename__ = "meetings"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    public_id: Mapped[str | None] = mapped_column(
+        String(16), unique=True, index=True, nullable=True, default=generate_public_id
+    )
     granola_meeting_id: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

@@ -13,10 +13,13 @@ from app.services.analysis_service import analyze_meeting
 router = APIRouter()
 
 
-def _scoped_meeting_query(db: Session, user, meeting_id: int | None = None):
+def _scoped_meeting_query(db: Session, user, meeting_id: str | None = None):
     query = db.query(Meeting).filter(Meeting.user_id == user.id)
     if meeting_id is not None:
-        query = query.filter(Meeting.id == meeting_id)
+        if str(meeting_id).isdigit():
+            query = query.filter(Meeting.id == int(meeting_id))
+        else:
+            query = query.filter(Meeting.public_id == meeting_id)
     return query, user
 
 
@@ -33,6 +36,7 @@ def list_meetings(
         results.append(
             {
                 "id": str(meeting.id),
+                "public_id": meeting.public_id,
                 "granola_meeting_id": meeting.granola_meeting_id,
                 "title": meeting.title,
                 "source": "recall" if meeting.granola_meeting_id.startswith("recall:") else "granola",
@@ -51,7 +55,7 @@ def get_meeting(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    query, _ = _scoped_meeting_query(db, user, int(meeting_id))
+    query, _ = _scoped_meeting_query(db, user, meeting_id)
     meeting = query.first()
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
@@ -75,6 +79,7 @@ def get_meeting(
     ]
     return {
         "id": str(meeting.id),
+        "public_id": meeting.public_id,
         "granola_meeting_id": meeting.granola_meeting_id,
         "title": meeting.title,
         "source": "recall" if meeting.granola_meeting_id.startswith("recall:") else "granola",
@@ -92,7 +97,7 @@ def analyze_meeting_route(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    query, _ = _scoped_meeting_query(db, user, int(meeting_id))
+    query, _ = _scoped_meeting_query(db, user, meeting_id)
     meeting = query.first()
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
@@ -141,7 +146,7 @@ def get_meeting_transcript(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    query, _ = _scoped_meeting_query(db, user, int(meeting_id))
+    query, _ = _scoped_meeting_query(db, user, meeting_id)
     meeting = query.first()
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")
@@ -178,7 +183,7 @@ async def get_meeting_video(
     db: Session = Depends(get_db),
     user=Depends(get_current_user),
 ):
-    query, _ = _scoped_meeting_query(db, user, int(meeting_id))
+    query, _ = _scoped_meeting_query(db, user, meeting_id)
     meeting = query.first()
     if not meeting:
         raise HTTPException(status_code=404, detail="Meeting not found")

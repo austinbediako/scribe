@@ -12,6 +12,7 @@ from app.db.models import (
     TranscriptSegment,
     User,
     WeeklyInsight,
+    generate_public_id,
 )
 from app.db.session import engine
 
@@ -19,6 +20,7 @@ from app.db.session import engine
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     inspector = inspect(engine)
+    _ensure_meeting_public_ids(inspector)
     if "meeting_captures" not in inspector.get_table_names():
         return
 
@@ -39,3 +41,21 @@ def init_db() -> None:
                 connection.execute(
                     text(f"ALTER TABLE meeting_captures ADD COLUMN {column_name} {column_type}")
                 )
+
+
+def _ensure_meeting_public_ids(inspector) -> None:
+    if "meetings" not in inspector.get_table_names():
+        return
+    existing = {column["name"] for column in inspector.get_columns("meetings")}
+    with engine.begin() as connection:
+        if "public_id" not in existing:
+            connection.execute(text("ALTER TABLE meetings ADD COLUMN public_id VARCHAR(16)"))
+        connection.execute(
+            text("CREATE UNIQUE INDEX IF NOT EXISTS ix_meetings_public_id ON meetings (public_id)")
+        )
+        rows = connection.execute(text("SELECT id FROM meetings WHERE public_id IS NULL")).fetchall()
+        for (meeting_id,) in rows:
+            connection.execute(
+                text("UPDATE meetings SET public_id = :pid WHERE id = :mid"),
+                {"pid": generate_public_id(), "mid": meeting_id},
+            )
