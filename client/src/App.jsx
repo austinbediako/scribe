@@ -9,6 +9,7 @@ import { Auth } from './components/Auth.jsx';
 import { Landing } from './components/Landing.jsx';
 import { Insights } from './components/Insights.jsx';
 import { CalendarIcon, NoteIcon, SparkleIcon } from './components/icons.jsx';
+import { Loader } from './components/Loader.jsx';
 
 function notesFrom(data) {
   return Array.isArray(data) ? data : data?.notes || data?.results || [];
@@ -233,9 +234,9 @@ export default function App() {
         onHome={() => navigate('/')}
       />
 
-        {loading && (
+      {loading && (
         <div className="app__loading">
-          <span className="spinner" />
+          <Loader label="Loading your meetings" />
         </div>
       )}
 
