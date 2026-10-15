@@ -44,7 +44,7 @@ services:
         sync: false
       # Public URL of this service; Recall webhooks target {this}/api/webhooks/recall.
       - key: PUBLIC_API_BASE_URL
-        value: https://scribe-api.onrender.com
+        value: https://scribe-api-yk5t.onrender.com
       # Comma-separated allowed origins. Keep the Vercel frontend + local dev.
       - key: CORS_ORIGINS
         value: https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173
