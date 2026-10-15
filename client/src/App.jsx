@@ -84,7 +84,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!token || path !== '/app') return undefined;
+    if (token && path.startsWith('/app')) loadNotes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, path]);
+
+  const inApp = path.startsWith('/app');
+  useEffect(() => {
+    if (!token || !inApp) return undefined;
 
     setLoading(true);
     setError(null);
@@ -139,7 +145,7 @@ export default function App() {
       wsRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, path]);
+  }, [token, inApp]);
 
   useEffect(() => {
     if (!token) return;
