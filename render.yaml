@@ -1,4 +1,6 @@
-# Render blueprint for Scribe.
+# Render blueprint for the Scribe backend (scribe-api).
+# The frontend deploys separately on Vercel (client/vercel.json); it calls this
+# API directly via VITE_API_BASE_URL, so no proxy service is needed here.
 # Dashboard: New > Blueprint > pick this repo. Secrets marked sync:false are set
 # once in the Render dashboard (never commit real values here).
 services:
@@ -37,23 +39,9 @@ services:
         sync: false
       - key: RECALL_WORKSPACE_VERIFICATION_SECRET
         sync: false
-      # Set to https://scribe-api.onrender.com once the service URL is known.
+      # Public URL of this service; Recall webhooks target {this}/api/webhooks/recall.
       - key: PUBLIC_API_BASE_URL
-        sync: false
-      # Comma-separated origins, e.g. https://scribe-web.onrender.com,http://localhost:5173
+        value: https://scribe-api.onrender.com
+      # Comma-separated allowed origins. Keep the Vercel frontend + local dev.
       - key: CORS_ORIGINS
-        sync: false
-
-  - type: static
-    name: scribe-web
-    rootDir: client
-    buildCommand: pnpm install --frozen-lockfile && pnpm run build
-    staticPublishPath: dist
-    routes:
-      # Proxy API + WebSocket traffic to the backend service.
-      - type: rewrite
-        source: /api/*
-        destination: https://scribe-api.onrender.com/api/*
-      - type: rewrite
-        source: /ws
-        destination: https://scribe-api.onrender.com/ws
+        value: https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173

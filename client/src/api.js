@@ -1,4 +1,10 @@
-const BASE = '/api';
+const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const BASE = `${apiBase}/api`;
+
+export function wsUrl(token) {
+  const wsBase = apiBase ? apiBase.replace(/^http/, 'ws') : window.location.origin.replace(/^http/, 'ws');
+  return `${wsBase}/ws?token=${encodeURIComponent(token)}`;
+}
 
 function getToken() {
   return localStorage.getItem('scribe_token');

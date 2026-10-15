@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { api, setToken, clearToken } from './api.js';
+import { api, setToken, clearToken, wsUrl } from './api.js';
 import { TopBar } from './components/TopBar.jsx';
 import { Sidebar } from './components/Sidebar.jsx';
 import { NotesList } from './components/NotesList.jsx';
@@ -107,8 +107,7 @@ export default function App() {
     setLoading(true);
     setError(null);
 
-    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/ws?token=${encodeURIComponent(token)}`;
-    const socket = new WebSocket(wsUrl);
+    const socket = new WebSocket(wsUrl(token));
     wsRef.current = socket;
 
     socket.onopen = () => {
