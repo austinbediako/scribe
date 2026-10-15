@@ -4,6 +4,15 @@ import { noteTitle, noteOwner, formatDateTime, noteSummary, normalizeTranscript 
 import { ChevronLeft, ChevronRight } from './icons.jsx';
 import { MeetingTimeline } from './MeetingTimeline.jsx';
 
+const SPEAKER_PALETTE = ['#8B5CF6', '#3B82F6', '#14B8A6', '#F59E0B', '#EC4899', '#10B981', '#F97316', '#06B6D4'];
+
+function speakerColor(key) {
+  const s = String(key || 'unknown');
+  let hash = 0;
+  for (let i = 0; i < s.length; i += 1) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  return SPEAKER_PALETTE[hash % SPEAKER_PALETTE.length];
+}
+
 function formatTime(value) {
   if (value === null || value === undefined) return '';
   const seconds = Number(value);
@@ -114,15 +123,20 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
                 );
                 if (maxEnd > 0) setTimelineDurationSec(maxEnd / 1000);
 
-                const events = data.map((entry, idx) => ({
-                  id: `speaker-${entry?.participant?.id || idx}-${entry?.start_timestamp?.relative || 0}`,
-                  track: 'events',
-                  category: 'system',
-                  timestamp: Number(entry?.start_timestamp?.relative) || 0,
-                  endTimestamp: Number(entry?.end_timestamp?.relative) || undefined,
-                  title: entry?.participant?.name || 'Speaker',
-                  description: `${entry?.participant?.name || 'Unknown'} spoke`,
-                }));
+                const events = data.map((entry, idx) => {
+                  const participantKey = entry?.participant?.id ?? entry?.participant?.name ?? idx;
+                  const participantName = entry?.participant?.name || 'Speaker';
+                  return {
+                    id: `speaker-${participantKey}-${entry?.start_timestamp?.relative || 0}`,
+                    track: 'events',
+                    category: 'system',
+                    color: speakerColor(participantKey),
+                    timestamp: Number(entry?.start_timestamp?.relative) || 0,
+                    endTimestamp: Number(entry?.end_timestamp?.relative) || undefined,
+                    title: participantName,
+                    description: `${participantName} spoke`,
+                  };
+                });
                 setTimelineEvents(events);
               }
             } catch {

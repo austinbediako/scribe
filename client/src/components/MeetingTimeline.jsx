@@ -60,6 +60,7 @@ function normalizeEvent(event, durationSeconds) {
     id: String(event.id || `${track}-${timestamp}-${event.title || 'event'}`),
     track,
     category,
+    color: typeof event.color === 'string' && event.color ? event.color : null,
     title: typeof event.title === 'string' && event.title.trim() ? event.title.trim() : 'Untitled event',
     description: typeof event.description === 'string' ? event.description : '',
     metadata: event.metadata && typeof event.metadata === 'object' ? event.metadata : {},
@@ -263,7 +264,7 @@ export function MeetingTimeline({
                             style={{
                               left: 0,
                               width: `${calculatePosition(event.endTimestamp, safeDuration) - calculatePosition(event.timestamp, safeDuration)}%`,
-                              background: CATEGORY_COLOR[event.category],
+                              background: event.color || CATEGORY_COLOR[event.category],
                             }}
                             title={`${event.title} ${formatPlaybackTime(event.timestamp)} - ${formatPlaybackTime(event.endTimestamp)}`}
                           />
@@ -271,7 +272,7 @@ export function MeetingTimeline({
                         <button
                           type="button"
                           className={`meetingTimeline__marker${selectedEventId === event.id ? ' is-selected' : ''}`}
-                          style={{ background: CATEGORY_COLOR[event.category] }}
+                          style={{ background: event.color || CATEGORY_COLOR[event.category] }}
                           aria-label={`${event.title} at ${formatPlaybackTime(event.timestamp)}`}
                           title={`${event.title} - ${formatPlaybackTime(event.timestamp)}${event.description ? ` - ${event.description}` : ''}`}
                           onClick={(nativeEvent) => {
