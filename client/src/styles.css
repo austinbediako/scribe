@@ -2192,16 +2192,16 @@ input {
 /* ---------- Meeting Timeline ---------- */
 
 .meetingTimeline {
-  --tl-bg: #12172a;
-  --tl-bg-raised: #1a2138;
-  --tl-line: rgba(255, 255, 255, 0.09);
-  --tl-text: #e6e9f2;
-  --tl-muted: #8b93ad;
-  --tl-faint: #5c647e;
+  --tl-bg: #fbfbfc;
+  --tl-bg-raised: #f4f4f6;
+  --tl-line: rgba(0, 0, 0, 0.08);
+  --tl-text: #1c1c1e;
+  --tl-muted: #6e6e73;
+  --tl-faint: #aeaeb2;
   display: flex;
   flex-direction: column;
   background: var(--tl-bg);
-  border: 1px solid #1e2540;
+  border: 1px solid var(--line);
   border-radius: 18px;
   overflow: hidden;
   font-family: var(--font);
@@ -2413,6 +2413,16 @@ input {
   background: var(--tl-line);
 }
 
+.meetingTimeline__tickMark {
+  position: absolute;
+  bottom: 17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+}
+
 .meetingTimeline__trackRow {
   display: flex;
   border-bottom: 1px solid var(--tl-line);
@@ -2468,18 +2478,18 @@ input {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08), 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px var(--tl-bg), 0 1px 3px rgba(0, 0, 0, 0.18);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .meetingTimeline__marker:hover {
   transform: translate(-50%, -50%) scale(1.35);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 2px var(--tl-bg), 0 2px 6px rgba(0, 0, 0, 0.25);
   z-index: 5;
 }
 
@@ -2504,8 +2514,7 @@ input {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #a78bfa;
-  box-shadow: 0 0 10px rgba(167, 139, 250, 0.7);
+  background: var(--purple);
   transform: translateX(-1px);
   z-index: 10;
   pointer-events: none;
@@ -2551,7 +2560,7 @@ input {
 
 .meetingTimeline--error {
   padding: 16px;
-  color: #fda4af;
+  color: var(--red);
   background: var(--tl-bg);
 }
 

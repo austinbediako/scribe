@@ -196,6 +196,18 @@ export function MeetingTimeline({
   }, [normalizedEvents]);
   const laneIndexByName = useMemo(() => new Map(lanes.map((lane, index) => [lane.name, index])), [lanes]);
 
+  const eventColor = (event) => event.color || CATEGORY_COLOR[event.category];
+
+  const tickColor = (tick) => {
+    const active = normalizedEvents.find(
+      (event) => event.timestamp <= tick && (event.endTimestamp ?? event.timestamp) >= tick
+    );
+    if (active) return eventColor(active);
+    const before = normalizedEvents.filter((event) => event.timestamp <= tick).pop();
+    if (before) return eventColor(before);
+    return null;
+  };
+
   const playheadLeft = `${(safeCurrentTime / safeDuration) * 100}%`;
 
   if (error) {
@@ -253,11 +265,15 @@ export function MeetingTimeline({
             <div className="meetingTimeline__ruler">
               <div className="meetingTimeline__labelColumn" />
               <div className="meetingTimeline__rulerArea" ref={rulerAreaRef} onClick={handleSeekByClick}>
-                {ticks.map((tick) => (
-                  <div key={tick} className="meetingTimeline__tick" style={{ left: `${(tick / safeDuration) * 100}%` }}>
-                    <span>{formatPlaybackTime(tick)}</span>
-                  </div>
-                ))}
+                {ticks.map((tick) => {
+                  const color = tickColor(tick);
+                  return (
+                    <div key={tick} className="meetingTimeline__tick" style={{ left: `${(tick / safeDuration) * 100}%` }}>
+                      <span>{formatPlaybackTime(tick)}</span>
+                      {color && <i className="meetingTimeline__tickMark" style={{ background: color }} />}
+                    </div>
+                  );
+                })}
                 <div className="meetingTimeline__playheadLine" style={{ left: playheadLeft }} />
               </div>
             </div>
@@ -279,7 +295,7 @@ export function MeetingTimeline({
                             style={{
                               left: 0,
                               width: `${calculatePosition(event.endTimestamp, safeDuration) - calculatePosition(event.timestamp, safeDuration)}%`,
-                              background: event.color || CATEGORY_COLOR[event.category],
+                              background: eventColor(event),
                             }}
                             title={`${event.title} ${formatPlaybackTime(event.timestamp)} - ${formatPlaybackTime(event.endTimestamp)}`}
                           />
@@ -287,7 +303,7 @@ export function MeetingTimeline({
                         <button
                           type="button"
                           className={`meetingTimeline__marker${selectedEventId === event.id ? ' is-selected' : ''}`}
-                          style={{ background: event.color || CATEGORY_COLOR[event.category] }}
+                          style={{ background: eventColor(event) }}
                           aria-label={`${event.title} at ${formatPlaybackTime(event.timestamp)}`}
                           title={`${event.title} - ${formatPlaybackTime(event.timestamp)}${event.description ? ` - ${event.description}` : ''}`}
                           onClick={(nativeEvent) => {
