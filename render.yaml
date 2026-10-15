@@ -47,4 +47,4 @@ services:
         value: https://scribe-api-yk5t.onrender.com
       # Comma-separated allowed origins. Keep the Vercel frontend + local dev.
       - key: CORS_ORIGINS
-        value: https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+        value: https://scribe-livid.vercel.app,https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173
