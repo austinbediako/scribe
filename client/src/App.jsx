@@ -8,6 +8,7 @@ import { MeetingCapturePanel } from './components/MeetingCapturePanel.jsx';
 import { Auth } from './components/Auth.jsx';
 import { Landing } from './components/Landing.jsx';
 import { Insights } from './components/Insights.jsx';
+import { CalendarIcon, NoteIcon, SparkleIcon } from './components/icons.jsx';
 
 function notesFrom(data) {
   return Array.isArray(data) ? data : data?.notes || data?.results || [];
@@ -224,27 +225,6 @@ export default function App() {
 
   return (
     <div className="app app--premium">
-      <div className="app__fx" aria-hidden="true">
-        <svg viewBox="0 0 1440 420" preserveAspectRatio="none" className="app__wave">
-          <defs>
-            <linearGradient id="appWave" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(139,92,246,0.14)" />
-              <stop offset="50%" stopColor="rgba(168,85,247,0.45)" />
-              <stop offset="100%" stopColor="rgba(236,72,153,0.2)" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0 210 C 120 140, 260 280, 400 200 S 620 120, 800 210 S 1000 300, 1200 190 S 1380 180, 1440 210"
-            fill="none"
-            stroke="url(#appWave)"
-            strokeWidth="4"
-            strokeLinecap="round"
-            strokeDasharray="10 14"
-          />
-        </svg>
-        <div className="app__orb app__orb--left" />
-        <div className="app__orb app__orb--right" />
-      </div>
       <TopBar
         query={query}
         onQueryChange={setQuery}
@@ -292,7 +272,7 @@ export default function App() {
 
         <main className="content">
           {selectedNoteId ? (
-            <NoteDetail noteId={selectedNoteId} onBack={() => setSelectedNoteId(null)} />
+            <NoteDetail noteId={selectedNoteId} onBack={() => navigate('/app')} />
           ) : activeView === 'captures' ? (
             <MeetingCapturePanel captures={captures} onChanged={loadNotes} />
           ) : activeView === 'insights' ? (
@@ -308,6 +288,42 @@ export default function App() {
           )}
         </main>
       </div>
+
+      <nav className="tabbar" aria-label="Primary">
+        <button
+          type="button"
+          className={`tabbar__item ${activeView === 'list' && !selectedNoteId ? 'tabbar__item--active' : ''}`}
+          onClick={() => {
+            setSelectedNoteId(null);
+            navigate('/app');
+          }}
+        >
+          <NoteIcon />
+          <span>Meetings</span>
+        </button>
+        <button
+          type="button"
+          className={`tabbar__item ${activeView === 'captures' ? 'tabbar__item--active' : ''}`}
+          onClick={() => {
+            setSelectedNoteId(null);
+            navigate('/app/captures');
+          }}
+        >
+          <CalendarIcon />
+          <span>Captures</span>
+        </button>
+        <button
+          type="button"
+          className={`tabbar__item ${activeView === 'insights' ? 'tabbar__item--active' : ''}`}
+          onClick={() => {
+            setSelectedNoteId(null);
+            navigate('/app/insights');
+          }}
+        >
+          <SparkleIcon />
+          <span>Insights</span>
+        </button>
+      </nav>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { FolderIcon, NoteIcon, SparkleIcon } from './icons.jsx';
+import { CalendarIcon, FolderIcon, NoteIcon, SparkleIcon } from './icons.jsx';
 
 export function Sidebar({ folders, activeFolder, onSelectFolder, totalCount, activeView, onSelectInsights, onSelectCaptures, onSelectAll, capturesCount }) {
   return (
@@ -34,7 +34,7 @@ export function Sidebar({ folders, activeFolder, onSelectFolder, totalCount, act
           onClick={onSelectCaptures}
         >
           <span className="navitem__icon">
-            <FolderIcon />
+            <CalendarIcon />
           </span>
           <span className="navitem__label">Captures</span>
           {typeof capturesCount === 'number' && capturesCount > 0 && (

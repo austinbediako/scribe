@@ -1,5 +1,27 @@
 import { noteTitle, noteOwner, noteDate, summaryPreview } from '../utils.js';
-import { ChevronLeft } from './icons.jsx';
+import { ChevronRight } from './icons.jsx';
+
+function EmptyIllustration() {
+  return (
+    <svg width="140" height="96" viewBox="0 0 140 96" fill="none" aria-hidden="true">
+      <rect x="8" y="14" width="86" height="68" rx="10" fill="var(--purple-soft)" />
+      <rect x="20" y="28" width="38" height="7" rx="3.5" fill="var(--purple-line)" />
+      <rect x="20" y="41" width="62" height="6" rx="3" fill="var(--purple-line)" />
+      <rect x="20" y="53" width="50" height="6" rx="3" fill="var(--purple-line)" />
+      <rect x="20" y="65" width="58" height="6" rx="3" fill="var(--purple-line)" />
+      <circle cx="112" cy="40" r="16" fill="var(--purple)" />
+      <path
+        d="M106 40h12M112 34v12"
+        stroke="#fff"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+      />
+      <rect x="86" y="62" width="46" height="20" rx="10" fill="#fff" stroke="var(--line)" />
+      <rect x="94" y="69" width="22" height="6" rx="3" fill="var(--line)" />
+      <circle cx="122" cy="72" r="3" fill="var(--purple)" />
+    </svg>
+  );
+}
 function initials(name) {
   if (!name) return '?';
   return name
@@ -15,6 +37,9 @@ export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
     <div className="meeting-home">
       {notes.length === 0 ? (
         <div className="empty">
+          <div className="empty__art">
+            <EmptyIllustration />
+          </div>
           <h2 className="empty__title">No completed meetings yet</h2>
           <p className="empty__text">
             Schedule a capture above, or sync notes from Granola. The capture bot will appear in the meeting participants.
@@ -38,7 +63,7 @@ export function NotesList({ notes, onOpen, onLoadMore, hasMore, loadingMore }) {
                   </div>
                 </div>
                 <span className="note__chevron">
-                  <ChevronLeft />
+                  <ChevronRight />
                 </span>
               </button>
             );

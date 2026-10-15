@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://scribe-api.onrender.com/api/:path*" },
+    { "source": "/ws", "destination": "https://scribe-api.onrender.com/ws" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

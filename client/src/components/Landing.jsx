@@ -1,4 +1,4 @@
-import { BrandMark, SparkleIcon, NoteIcon, FolderIcon } from './icons.jsx';
+import { BrandMark, SparkleIcon, NoteIcon, FolderIcon, CheckIcon } from './icons.jsx';
 
 const features = [
   {
@@ -46,7 +46,9 @@ function MeetingOrbit() {
         <span>Open-ended question</span>
       </div>
       <div className="hero__chip hero__chip--right">
-        <span className="hero__chipIcon">✓</span>
+        <span className="hero__chipIcon">
+          <CheckIcon />
+        </span>
         <span>Contribution recognized</span>
       </div>
 
@@ -118,11 +120,17 @@ export function Landing({ onOpen, onSignUp }) {
                 Sign in
               </button>
             </div>
-            <div className="hero__meta">
-              <span>✓ No training from scratch</span>
-              <span>✓ Private by default</span>
-              <span>✓ Grounded in real evidence</span>
-            </div>
+            <ul className="hero__meta">
+              <li>
+                <CheckIcon /> No training from scratch
+              </li>
+              <li>
+                <CheckIcon /> Private by default
+              </li>
+              <li>
+                <CheckIcon /> Grounded in real evidence
+              </li>
+            </ul>
           </div>
           <MeetingOrbit />
         </div>
@@ -134,14 +142,13 @@ export function Landing({ onOpen, onSignUp }) {
             <span className="feature__icon">{feature.icon}</span>
             <h3 className="feature__title">{feature.title}</h3>
             <p className="feature__text">{feature.text}</p>
-            <span className="feature__link">Learn more →</span>
           </article>
         ))}
       </section>
 
       <footer className="landing__footer">
         <p>
-          Powered by Granola and Recall.ai. Works with Google Meet, Zoom, Teams, Webex and Slack.
+          Powered by Granola and Recall.ai. Works with Google Meet, Zoom, Teams, and Webex.
         </p>
       </footer>
     </div>

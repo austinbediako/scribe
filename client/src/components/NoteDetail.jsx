@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import { noteTitle, noteOwner, formatDateTime, noteSummary, normalizeTranscript } from '../utils.js';
-import { ChevronLeft } from './icons.jsx';
+import { ChevronLeft, ChevronRight } from './icons.jsx';
 import { MeetingTimeline } from './MeetingTimeline.jsx';
 
 function formatTime(value) {
@@ -270,6 +270,12 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
               )}
               <a className="recordingAction" href={videoUrl} target="_blank" rel="noreferrer" aria-label="Open or download recording">
                 <svg className="recordingAction__art" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="recordingGradient" x1="6" y1="10" x2="58" y2="54" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#8b5cf6" />
+                      <stop offset="1" stopColor="#5b21b6" />
+                    </linearGradient>
+                  </defs>
                   <rect x="6" y="10" width="52" height="44" rx="11" fill="url(#recordingGradient)" />
                   <path d="M26 24.5v15l14-7.5-14-7.5Z" fill="white" />
                   <path d="M49 41l6 6-6 6" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
@@ -279,15 +285,8 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
                   <strong>Open or download recording</strong>
                   <small>Opens the secure Recall-hosted video in a new tab.</small>
                 </span>
-                <ChevronLeft className="recordingAction__chevron" />
+                <ChevronRight className="recordingAction__chevron" />
               </a>
-              <defs>
-                <linearGradient id="recordingGradient" x1="6" y1="10" x2="58" y2="54" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#60a5fa" />
-                  <stop offset="0.55" stopColor="#2563eb" />
-                  <stop offset="1" stopColor="#1e1b4b" />
-                </linearGradient>
-              </defs>
             </section>
           )}
 
@@ -314,7 +313,7 @@ export function NoteDetail({ noteId, onBack, onHome, onMeetings }) {
             <button className="btn btn--primary analyzeDock__button" onClick={analyze} disabled={analysis.loading}>
               {analysis.loading ? 'Analyzing…' : 'Analyze meeting'}
             </button>
-            {analysis.error && <p className="authError">{analysis.error.message}</p>}
+            {analysis.error && <p className="auth__error">{analysis.error.message}</p>}
             {analysis.result && (
               <div className="analysisResult">
                 <p className="analysisCount">{analysis.result.observation_count} observations</p>

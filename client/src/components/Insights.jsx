@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { SparkleIcon } from './icons.jsx';
+import { formatDateTime } from '../utils.js';
 
 export function Insights() {
   const [state, setState] = useState({ loading: true, error: null, insight: null, completing: false });
@@ -35,8 +36,11 @@ export function Insights() {
       <header className="insights__header">
         <div className="insights__titleGroup">
           <SparkleIcon />
-          <h1 className="insights__title">Weekly Leadership Insights</h1>
+          <h1 className="insights__title">Weekly leadership insights</h1>
         </div>
+        {state.insight?.generated_at && (
+          <p className="insights__date">Generated {formatDateTime(state.insight.generated_at)}</p>
+        )}
       </header>
 
       {state.loading && <div className="detail__loading">Analyzing your week...</div>}
@@ -48,7 +52,17 @@ export function Insights() {
         </div>
       )}
 
-      {state.insight && (
+      {state.insight && state.insight.status === 'insufficient_evidence' && (
+        <div className="empty">
+          <h2 className="empty__title">Not enough evidence yet</h2>
+          <p className="empty__text">
+            {state.insight.growth_area ||
+              'Sync or capture a few more meetings this week and Scribe will generate your first coaching card.'}
+          </p>
+        </div>
+      )}
+
+      {state.insight && state.insight.status !== 'insufficient_evidence' && (
         <div className="insightCards">
           <div className="insightCard insightCard--strength">
             <div className="insightCard__badge">Strength</div>
