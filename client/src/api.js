@@ -41,7 +41,7 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok) {
-    if (response.status === 401 && (hadAuth || !path.startsWith('/api/auth/'))) {
+    if (response.status === 401 && !path.startsWith('/auth/login') && !path.startsWith('/auth/signup')) {
       clearToken();
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new Event('scribe:unauthorized'));
