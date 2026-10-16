@@ -164,11 +164,13 @@ See `.env.example` for the template. Key settings:
 
 | Var | Purpose |
 |---|---|
-| `DATABASE_URL` | SQLite default `sqlite:///./scribe.db`; use Postgres in prod |
-| `USE_DEMO_DATA` / `GRANOLA_API_KEY` / `GRANOLA_API_BASE_URL` | Granola sync (`false` + a real key = live) |
+| `DATABASE_URL` | SQLite default `sqlite:///./scribe.db`; Postgres in prod (Render wires it from `scribe-db`) |
 | `RECALL_REGION` / `RECALL_API_BASE_URL` / `RECALL_API_KEY` | Recall region & credentials (region must match key) |
 | `RECALL_WORKSPACE_VERIFICATION_SECRET` (alias `RECALL_WEBHOOK_SECRET`) | Verify Recall webhook signatures |
 | `PUBLIC_API_BASE_URL` | Public HTTPS URL Recall uses to POST webhooks; must not be localhost |
+| `CORS_ORIGINS` | Comma-separated allowed origins (Vercel prod alias + local dev ports) |
+
+Granola sync vars (`GRANOLA_API_KEY` etc.) still exist in backend config for local use but are no longer used by the frontend or the Render blueprint.
 
 Note: backend resolves `.env` from CWD. Run uvicorn with CWD `server/backend` for env to be picked up.
 

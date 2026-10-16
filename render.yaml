@@ -24,16 +24,8 @@ services:
         fromDatabase:
           name: scribe-db
           property: connectionString
-      - key: USE_DEMO_DATA
-        value: "false"
-      - key: GRANOLA_API_BASE_URL
-        value: https://public-api.granola.ai/v1
-      - key: GRANOLA_AUTH_HEADER
-        value: Authorization
-      - key: GRANOLA_AUTH_SCHEME
-        value: Bearer
-      - key: GRANOLA_API_KEY
-        sync: false
+      # All sensitive values are sync:false — set them once in the Render
+      # dashboard, never in this file. See AGENTS.md for the full list.
       - key: RECALL_REGION
         value: us-east-1
       - key: RECALL_API_BASE_URL
@@ -44,10 +36,10 @@ services:
         sync: false
       # Public URL of this service; Recall webhooks target {this}/api/webhooks/recall.
       - key: PUBLIC_API_BASE_URL
-        value: https://scribe-api-yk5t.onrender.com
-      # Comma-separated allowed origins. Keep the Vercel frontend + local dev.
+        sync: false
+      # Comma-separated allowed origins (Vercel frontend + local dev ports).
       - key: CORS_ORIGINS
-        value: https://scribe-livid.vercel.app,https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173
+        sync: false
 
 databases:
   - name: scribe-db

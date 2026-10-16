@@ -23,7 +23,7 @@ This file is the source of truth for "what happened and why" — keep it updated
 - **Free Postgres expires 30 days after creation** (+14-day grace). For anything serious, move `DATABASE_URL` to an external Postgres (Neon/Supabase) or pay for Render's starter.
 - **Env var changes on Vercel don't retroactively apply** — a rebuild is required. Push a commit or redeploy after changing `VITE_API_BASE_URL`.
 - **Render appends a random suffix to hostnames** (`scribe-api` → `scribe-api-yk5t`). Don't hardcode the clean name anywhere; the actual URL lives in `VITE_API_BASE_URL` + `PUBLIC_API_BASE_URL` + `render.yaml`.
-- **Blueprint `sync:false` env vars** (`GRANOLA_API_KEY`, `RECALL_API_KEY`, `RECALL_WORKSPACE_VERIFICATION_SECRET`) must be entered manually in the Render dashboard — they are never committed.
+- **Nothing with a value lives in `render.yaml` anymore.** Set these in the Render dashboard (all `sync:false`): `RECALL_API_KEY`, `RECALL_WORKSPACE_VERIFICATION_SECRET`, `PUBLIC_API_BASE_URL=https://scribe-api-yk5t.onrender.com`, `CORS_ORIGINS=https://scribe-livid.vercel.app,https://scribe-kaeytees-projects.vercel.app,http://localhost:5173,http://127.0.0.1:5173`. Granola vars were removed entirely — the frontend no longer uses Granola sync.
 
 ## Frontend config
 
@@ -35,7 +35,7 @@ This file is the source of truth for "what happened and why" — keep it updated
 ## Auth & security rules that must not regress
 
 - All `/api/meetings/*`, `/api/actions*`, `/api/insights/*`, `/api/integrations/recall/*` endpoints require `get_current_user` and filter by `user.id`. Anonymous access must return 401/404 — never leak other users' data.
-- `POST /api/integrations/granola/sync` still has the demo-user fallback (documented demo path) — the only place anonymous writes can happen.
+- `POST /api/integrations/granola/sync` still has the demo-user fallback (documented demo path) — the only place anonymous writes can happen. Granola was removed from all client UI; the backend route remains but is uncalled.
 - In `api.js`, 401s clear the token + fire `scribe:unauthorized` → logout — **except** `/auth/login` and `/auth/signup`, which must stay on the auth page and show the error inline. Don't broaden this exemption.
 - Passwords: PBKDF2-HMAC-SHA256 (`core/security.py`). Tokens: SHA256-hashed in `AccessToken`, 30-day expiry.
 - Capture consent (`consent_confirmed: true`) is mandatory — never bypass it.
