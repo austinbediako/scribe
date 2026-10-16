@@ -33,20 +33,21 @@ Paths handled in `App.jsx` via `window.history.pushState`:
 | TopBar.jsx, Sidebar.jsx | layout, search, navigation (Meetings/Insights/Captures) |
 | NotesList.jsx | list of meetings |
 | NoteDetail.jsx | video player (top) + transcript + MeetingTimeline (below video); seekTo; fetches /api/meetings/{id}, /transcript, /video |
-| MeetingTimeline.jsx | interactive timeline (BOT/EVENTS/LOGS tracks), playhead, keyboard shortcuts, responsive, loading/empty states |
-| Insights.jsx | shows /api/insights/current and history |
+| MeetingTimeline.jsx | fixed-height speaker-strip timeline (per-speaker colored markers + ruler ticks), playhead, keyboard shortcuts |
+| Insights.jsx | weekly insight + By-meeting toggle with searchable meeting picker |
 | MeetingCapturePanel.jsx | schedule/list/cancel captures + calendars, consent gating |
 | icons.jsx | SVG icon set |
 
 ## Integration contract
-- See root `README.md` API catalog and `server/frontend-handoff.md` (caveats: insights not owner-scoped yet, weekly insight generates on each GET, action completion stub).
-- Auth: token stored in `localStorage` as `scribe_token`; 401 from any non-auth endpoint clears token + dispatches `scribe:unauthorized`. `/api/auth/*` 401s don't auto-logout (handled in api.js).
-- Real-time: WebSocket `/ws?token=...` updates meetings list and broadcasts `capture.updated`.
+- See root `AGENTS.md` for deployment topology and invariants; `README.md` for the API catalog.
+- API base: `import.meta.env.VITE_API_BASE_URL` (set on Vercel); unset → relative `/api` proxied to `:8000` in dev.
+- Auth: token stored in `localStorage` as `scribe_token`; 401s clear the token + dispatch `scribe:unauthorized`, **except** `/auth/login` and `/auth/signup`, which keep the user on the auth page and show the error inline.
+- Real-time: WebSocket `/ws?token=...` (URL derived from `VITE_API_BASE_URL`) updates meetings list and broadcasts `capture.updated`; `loadNotes()` runs on every `/app*` route.
 - MeetingTimeline seeks video via refs passed down; transcript timestamps click-to-seek uses `seekTo(ms)`.
 
 ## Style
-- Global tokens in `src/styles.css`. Light Apple-like Scribe: purple/white, rounded corners, soft shadows. MeetingTimeline styles live in the same file (`.mtl-*` classes).
+- Global tokens in `src/styles.css`. Light Apple-like Scribe: purple/white, rounded corners, soft shadows. MeetingTimeline styles live in the same file (`.meetingTimeline__*` classes).
 
 ## Testing/build
-- `npm run build` (canonical local verification).
+- `pnpm run build` (canonical local verification).
 - Visual states (MeetingTimeline loading/empty) verified manually with dev server refresh.

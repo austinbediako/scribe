@@ -1,9 +1,8 @@
 # Scribe
 
-**Scribe** is a leadership coaching web app that turns meeting data into evidence-based leadership insights and practical micro-actions for individual leaders. It captures two sources of meeting data:
+**Scribe** is a leadership coaching web app that turns meeting data into evidence-based leadership insights and practical micro-actions for individual leaders. Meeting data comes from **Recall (Bot capture)** — an opt-in bot joins Google Meet / Zoom / Teams / Webex meetings via a scheduled capture, with a full recorded video and transcript imported after the meeting. (Granola sync still exists in the backend but is no longer surfaced in the UI.)
 
-1. **Granola** — meeting notes/transcripts synced from the user's account.
-2. **Recall (Bot capture)** — opt-in bot joins Google Meet / Zoom / Teams / Webex meetings via a scheduled capture, with a full recorded video and transcript imported after the meeting.
+> **Current project state, deployment topology, and hard-won gotchas live in `AGENTS.md`** — read it before making changes.
 
 The app then normalizes meeting data, runs an evidence-first analysis engine that labels observable leadership behaviors with supporting evidence, and generates a "weekly insight card" containing one strength, one growth area, supporting evidence, and one micro-action.
 
@@ -18,7 +17,8 @@ See `server/prd.md` for the full product requirements document and `server/plan.
 - **Evidence-first, no invented quotes:** observations carry `evidence_text` from real transcript segments; the engine abstains (`insufficient_evidence`) rather than fabricate.
 - **Private by intent:** insights, meetings, observations are per-user; tokens are role-scoped server-side.
 - **Micro-actions:** users can mark recommended actions planned/completed/dismissed/reflected (status patch persists today).
-- **Meeting playback:** NoteDetail page plays the Recall recording with an interactive timeline (BOT/EVENTS/LOGS tracks, markers, keyboard shortcuts) and a transcript; clicking markers or timestamps seeks the video.
+- **Meeting playback:** NoteDetail page plays the Recall recording with an interactive light-themed timeline (per-speaker colored markers staggered on a fixed-height track, speaker-colored ruler ticks, keyboard shortcuts) and a transcript; clicking markers or timestamps seeks the video.
+- **Stable meeting links:** every meeting has a `public_id` slug (`mtg-*`) used in URLs; numeric IDs still work server-side.
 
 ---
 
@@ -116,7 +116,8 @@ scribe/
 | HTTP | HTTPX (Granola + Recall) |
 | Tests | Pytest (+ pytest-asyncio) |
 | Realtime | fastapi WebSocket |
-| Deploy (local tunnels) | ngrok |
+| Deploy | Frontend → Vercel, Backend → Render (free web service), DB → Render Postgres |
+| Deploy (local tunnels) | ngrok (local dev only) |
 
 ---
 
@@ -139,10 +140,10 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ### 2. Frontend
 ```bash
 cd client
-npm install        # first time
-npm run dev         # http://localhost:5173
+pnpm install        # first time — this project uses pnpm
+pnpm dev            # http://localhost:5173
 ```
-Vite proxies `/api` and `/ws` to the backend.
+Vite proxies `/api` and `/ws` to the backend locally. In production the frontend calls the API directly via `VITE_API_BASE_URL` (see `client/.env.example`).
 
 ### 3. ngrok (required for Recall webhooks locally)
 ```bash
@@ -219,12 +220,15 @@ All routes live in `server/backend/app/api/routes/`. Base URL `http://127.0.0.1:
 ### Meetings (Granola + Recall-capture imported)
 - `GET /api/meetings` — list (newest first), per-user scoped
 - `GET /api/meetings/{id}` — meeting + transcript segments (also returns transcript array)
+- `GET /api/meetings/{id}/insight` — ephemeral coaching card computed from that meeting's observations
 - `GET /api/meetings/{id}/transcript` — `{meeting_id, segments, transcript}`
 - `POST /api/meetings/{id}/analyze` — `{meeting_id, status, observation_count, observations[], metrics {talk_time_ms_by_speaker}}`
 - `GET /api/meetings/{id}/video` — (Recall only) signed download URL + `speaker_timeline_download_url`
 
+`{id}` accepts the `public_id` slug (`mtg-*`) or the numeric id. All meeting endpoints require auth and are owner-scoped.
+
 ### Insights
-- `GET /api/insights/current` — generates & returns current insight card `{id, strength, growth_area, evidence_summary, micro_action, status, micro_action_id}`
+- `GET /api/insights/current` — idempotent weekly card `{id, strength, growth_area, evidence_summary, micro_action, status, micro_action_id}` (returns the existing card for the current ISO week instead of creating duplicates)
 - `GET /api/insights` — list history (newest first)
 - `GET /api/insights/{id}` — one insight (includes `generated_at`)
 
@@ -292,28 +296,23 @@ Run from `server/backend/`:
 . .venv/bin/activate
 pytest -q              # isolated DB via tests/conftest.py
 ```
-- Latest known: backend has 16 passed + 3 xfailed (as of prior frontend-handoff note); broader recent run reports ~30 tests passing.
-- xfail notes (expected): talk-time metrics, authenticated insight privacy, persisted action completion — these are documented backend follow-ups, not failures. Treat as next work, not regressions.
+- Latest: **32 tests, all passing** (no xfails — talk-time metrics, insight privacy, and action persistence are implemented).
 - Test isolation: `tests/conftest.py` redirects `DATABASE_URL` to a temp sqlite DB so tests never wipe dev data. Do not modify it to point at real dev DB.
 
 ---
 
-## Known limitations / next work (from PRD + frontend-handoff)
+## Known limitations / next work
 
-Open gaps that any agent can pick up next:
+Items 1–5, 7 and 12 below were fixed (see `AGENTS.md` for history): insights are owner-scoped, weekly insights are idempotent, action PATCH persists, CORS is env-driven and includes the Vercel origins, and the timeline is fully wired to speaker timeline data.
 
-1. **Auth scoping on insights** — `GET /api/insights`, `GET /api/insights/{id}` are currently global, not owner-scoped (backend follow-up). Frontend should not promise privacy until fixed.
-2. **Weekly insight idempotency** — `GET /api/insights/current` generates a new row each call; convert to stable weekly read/generate semantics.
-3. **Action persistence** — `PATCH /api/actions/{id}` is stubbed; doesn't verify existence before writing (now partly real: returns 404 on missing). Make durable.
-4. **CORS** — configured for localhost dev; adjust for deployed origins.
-5. **Transcript endpoint for UI** — yes exists (use it; frontend NoteDetail uses `/api/meetings/{id}` now which also returns `transcript`).
-6. **Video signed URL expiry & speaker timeline** — `/api/meetings/{id}/video` returns `download_url` + `speaker_timeline_download_url`; frontend timeline should fetch the speaker timeline from that URL (currently partially wired).
-7. ** talk-time-by-speaker** — backend returns `metrics.talk_time_ms_by_speaker` but UI may not yet display; PRD asks for conditional (only when timing data exists).
-8. **Granola scopes** — note scopes must include intended notes; verify with a live key.
-9. **Durable task queue** — webhook jobs run as FastAPI `BackgroundTasks`; production should use Celery/Redis for recovery across restarts.
-10. **Migrations** — Alembic present but dev uses init_db; productionize.
-11. **Recall calendar OAuth refresh** stores client secret in DB as plain text — should be secured.
-12. **Timeline visual polish** — MeetingTimeline under video verified; check interactive seek/timestamp click wiring end-to-end.
+Remaining open gaps:
+
+1. **Durable task queue** — webhook jobs run as FastAPI `BackgroundTasks`; a restart mid-processing loses them.
+2. **Migrations** — Alembic present but `init_db` is used at startup; productionize.
+3. **Recall calendar OAuth secrets** stored as plaintext in DB.
+4. **Analysis engine** — deterministic keyword matching, not an LLM; confidence is hardcoded.
+5. **No password-reset flow** — forgotten passwords need a manual DB update.
+6. **Free-tier limits** — Render free service sleeps after 15 min idle (~1 min cold start); free Postgres expires after 30 days.
 
 ### Design references
 - The root `README.md` (now this file) replaces the outdated minimal version. `update.pdf` is the latest design update — reference when matching visual style.
@@ -321,14 +320,12 @@ Open gaps that any agent can pick up next:
 
 ---
 
-## Dev runtime facts (current session)
+## Dev runtime facts
 
-- Backend (uvicorn) on `:8000` (log: `/tmp/backend.log`)
-- Frontend (vite) on `:5173` (log: `/tmp/vite.log`)
-- ngrok public URL: `https://swell-reexamine-divisive.ngrok-free.dev` forwarded to `:8000` (this changes if tunnel restarts — update `.env` + Recall dashboard)
-- `.env` already configured with `USE_DEMO_DATA=false` and a real Granola key + Recall credentials.
-
-vite proxy: `/api` → `http://127.0.0.1:8000`; `/ws` → WS same.
+- Backend (uvicorn) on `:8000` (log: `/tmp/backend.log`); frontend (vite) on `:5173` (log: `/tmp/vite.log`)
+- vite proxy: `/api` → `http://127.0.0.1:8000`; `/ws` → WS same.
+- ngrok is needed only for **local** webhook testing — production webhooks go straight to `https://scribe-api-yk5t.onrender.com/api/webhooks/recall`.
+- Prod env vars: `VITE_API_BASE_URL` on Vercel; `DATABASE_URL`, `CORS_ORIGINS`, `PUBLIC_API_BASE_URL`, plus Recall/Granola secrets on Render. See `AGENTS.md` for the full topology + gotchas.
 
 ---
 
@@ -341,10 +338,11 @@ vite proxy: `/api` → `http://127.0.0.1:8000`; `/ws` → WS same.
 
 ## Notes for agents picking this up
 
+- **Read `AGENTS.md` first** — deployment topology, prod gotchas (ephemeral SQLite, free-Postgres expiry, blueprint sync vs manual deploy), and invariants that must not regress.
 - Don't touch `tests/conftest.py` isolation behavior.
-- Don't expose secrets (Granola/Recall keys) in frontend — all live in backend `.env` only.
+- Don't expose secrets (Granola/Recall keys) in frontend — all live in backend `.env` / Render env vars.
 - Keep changes consistent with existing style/naming in surrounding files; prefer `edit` for targeted changes.
-- Build/verify: frontend `npm run build`, backend `pytest -q` should be green before testing.
+- Build/verify: frontend `pnpm run build`, backend `pytest -q` should be green before testing.
 - Recall supports only Google Meet / Zoom / Teams (live+webex) meeting URLs; validated in `CaptureRequest.meeting_url_must_be_supported`.
 - Consent (`consent_confirmed: true`) is mandatory for both manual captures and calendar scheduling — never auto-capture without it.
 - Scheduled/recent captures live on a dedicated `Captures` page (`/app/captures`); opening a meeting shows it in NoteDetail.
